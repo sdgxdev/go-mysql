@@ -2,16 +2,17 @@ package canal
 
 import (
 	"fmt"
+	"strings"
 	"sync/atomic"
 	"time"
 
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/ast"
 	uuid "github.com/satori/go.uuid"
-	"github.com/siddontang/go-log/log"
 	"github.com/sdgxdev/go-mysql/mysql"
 	"github.com/sdgxdev/go-mysql/replication"
 	"github.com/sdgxdev/go-mysql/schema"
+	"github.com/siddontang/go-log/log"
 )
 
 func (c *Canal) startSyncer() (*replication.BinlogStreamer, error) {
@@ -61,15 +62,17 @@ func (c *Canal) runSyncBinlog() error {
 		// contains only a name of the next binlog file
 		// See https://github.com/mysql/mysql-server/blob/8e797a5d6eb3a87f16498edcb7261a75897babae/sql/rpl_binlog_sender.h#L235
 		// and https://github.com/mysql/mysql-server/blob/8cc757da3d87bf4a1f07dcfb2d3c96fed3806870/sql/rpl_binlog_sender.cc#L899
-		if ev.Header.LogPos == 0 {
-			switch e := ev.Event.(type) {
-			case *replication.RotateEvent:
-				fakeRotateLogName = string(e.NextLogName)
-				log.Infof("received fake rotate event, next log name is %s", e.NextLogName)
-			}
+		/*
+			if ev.Header.LogPos == 0 {
+				switch e := ev.Event.(type) {
+				case *replication.RotateEvent:
+					fakeRotateLogName = string(e.NextLogName)
+					log.Infof("received fake rotate event, next log name is %s", e.NextLogName)
+				}
 
-			continue
-		}
+				continue
+			}
+		*/
 
 		savePos = false
 		force = false
@@ -92,7 +95,6 @@ func (c *Canal) runSyncBinlog() error {
 		case *replication.RotateEvent:
 			pos.Name = string(e.NextLogName)
 			pos.Pos = uint32(e.Position)
-			log.Infof("rotate binlog to %s", pos)
 			savePos = true
 			force = true
 			if err = c.eventHandler.OnRotate(e); err != nil {
@@ -140,9 +142,11 @@ func (c *Canal) runSyncBinlog() error {
 				return errors.Trace(err)
 			}
 		case *replication.QueryEvent:
-			stmts, _, err := c.parser.Parse(string(e.Query), "", "")
+			q := strings.Replace(string(e.Query), "\"", "`", 1)
+			q = strings.Replace(q, "\"", "`", 1)
+			stmts, _, err := c.parser.Parse(q, "", "")
 			if err != nil {
-				log.Errorf("parse query(%s) err %v, will skip this event", e.Query, err)
+				log.Warnf("parse query(%s) err %v, will skip this event", e.Query, err)
 				continue
 			}
 			for _, stmt := range stmts {
@@ -232,7 +236,7 @@ func parseStmt(stmt ast.StmtNode) (ns []*node) {
 
 func (c *Canal) updateTable(db, table string) (err error) {
 	c.ClearTableCache([]byte(db), []byte(table))
-	log.Infof("table structure changed, clear table cache: %s.%s\n", db, table)
+	//log.Infof("table structure changed, clear table cache: %s.%s\n", db, table)
 	if err = c.eventHandler.OnTableChanged(db, table); err != nil && errors.Cause(err) != schema.ErrTableNotExist {
 		return errors.Trace(err)
 	}
