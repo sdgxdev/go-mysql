@@ -12,9 +12,9 @@ import (
 
 	"github.com/pingcap/errors"
 	uuid "github.com/satori/go.uuid"
+	"github.com/sdgxdev/go-mysql/client"
+	. "github.com/sdgxdev/go-mysql/mysql"
 	"github.com/siddontang/go-log/log"
-	"github.com/siddontang/go-mysql/client"
-	. "github.com/siddontang/go-mysql/mysql"
 )
 
 var (
