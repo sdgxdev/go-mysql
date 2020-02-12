@@ -14,7 +14,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"github.com/sdgxdev/go-mysql/client"
 	. "github.com/sdgxdev/go-mysql/mysql"
-	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go/log"
 )
 
 var (

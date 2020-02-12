@@ -3,7 +3,7 @@ package replication
 import (
 	"context"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go/log"
 	"time"
 )
 

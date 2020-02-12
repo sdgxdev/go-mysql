@@ -9,7 +9,7 @@ import (
 	. "github.com/pingcap/check"
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser"
-	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go/log"
 	"github.com/sdgxdev/go-mysql/mysql"
 	"github.com/sdgxdev/go-mysql/replication"
 )

@@ -12,7 +12,7 @@ import (
 	"github.com/sdgxdev/go-mysql/mysql"
 	"github.com/sdgxdev/go-mysql/replication"
 	"github.com/sdgxdev/go-mysql/schema"
-	"github.com/siddontang/go-log/log"
+	"github.com/siddontang/go/log"
 )
 
 func (c *Canal) startSyncer() (*replication.BinlogStreamer, error) {
